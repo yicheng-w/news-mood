@@ -23,7 +23,7 @@ def clean_text(text):
 
 
 class NaiveBayesianTextAnalyzer:
-    threshold = 50
+    threshold = 10
 
     def __init__(self):
         self.classifier = NaiveBayesClassifier(2, 0)

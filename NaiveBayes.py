@@ -8,8 +8,8 @@ class Outcome:
     def resize_features(self, new_f_count):
         self.distribution.resize(new_f_count)
 
-    def add_sample(self, f_array):
-        self.distribution += f_array
+    def add_sample(self, f_array, probability = 1):
+        self.distribution += np.multiply(f_array, probability)
         self.n += 1
 
     def predict(self, f_array):
@@ -24,27 +24,32 @@ class NaiveBayesClassifier:
         self.outcomes = [Outcome(feature_count) for i in xrange(outcome_count)]
         self.sample_size = 0
 
-    def fit(self, feature_vector, outcome_id):
-        self.outcomes[outcome_id].add_sample(feature_vector)
+    def fit(self, feature_vector, outcome_id, prob = 1):
+        self.outcomes[outcome_id].add_sample(feature_vector, prob)
         self.sample_size += 1
 
     def train(self, inputs):
-        for (data, outcome) in inputs:
-            self.fit(data, outcome)
+        for (data, outcome, prob) in inputs:
+            self.fit(data, outcome, prob)
 
     def predict(self, data):
         outcome_id = -1
         outcome_probs = -1
         for i in xrange(len(self.outcomes)):
-            try:
-                i_prob = float(self.outcomes[i].n) / self.sample_size * self.outcomes[i].predict(data)
-            except IndexError:
-                print i
+            i_prob = float(self.outcomes[i].n) / self.sample_size * self.outcomes[i].predict(data)
             if i_prob > outcome_probs:
                 outcome_probs = i_prob
                 outcome_id = i
 
         return (outcome_id, outcome_probs)
+
+    def predict_all(self, data):
+        result_vector = []
+        for i in xrange(len(self.outcomes)):
+            i_prob = float(self.outcomes[i].n) / self.sample_size * self.outcomes[i].predict(data)
+            result_vector.append((i, i_prob))
+
+        return result_vector
 
     def set_feature_count(self, new_f_count):
         map(lambda o: o.resize_features(new_f_count), self.outcomes)
