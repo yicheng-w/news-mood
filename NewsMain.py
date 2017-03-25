@@ -1,4 +1,5 @@
 from HeadlineSentiment import SentimentAnalyzer
+import pickle
 
 sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
 

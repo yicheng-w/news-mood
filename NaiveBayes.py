@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class Outcome:
     def __init__(self, f_count):
@@ -13,6 +14,14 @@ class Outcome:
         self.n += 1
 
     def predict(self, f_array):
+        #result = 1
+        #for i in xrange(self.n):
+        #    if self.distribution.take(i):
+        #        if f_array[i]:
+        #            result += math.log(self.distribution.take(i) / self.n)
+        #        else:
+        #            result += math.log(1 - self.distribution.take(i) / self.n)
+        #return result
         probs = [self.distribution.take(i) / self.n
                     if f_array[i]
                     else 1 - self.distribution.take(i) / self.n
