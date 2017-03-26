@@ -15,18 +15,25 @@ class Outcome:
 
     def predict(self, f_array):
         #result = 1
-        #for i in xrange(self.n):
-        #    if self.distribution.take(i):
-        #        if f_array[i]:
-        #            result += math.log(self.distribution.take(i) / self.n)
-        #        else:
-        #            result += math.log(1 - self.distribution.take(i) / self.n)
-        #return result
-        probs = [self.distribution.take(i) / self.n
-                    if f_array[i]
-                    else 1 - self.distribution.take(i) / self.n
-                        for i in xrange(self.n)]
-        return reduce(lambda x,y: x * y, probs)
+        result = math.log(1)
+        for i in xrange(self.n):
+            prob = math.log(1. + self.distribution.take(i)) - math.log(self.distribution.size + self.n)
+            if f_array[i]:
+                result += prob
+            else:
+                result += math.log(self.distribution.size + self.n - 1. - self.distribution.take(i)) - math.log(self.distribution.size + self.n)
+            #probability = (1. + self.distribution.take(i)) / (self.distribution.size + self.n)
+            #if f_array[i]:
+            #    result *= probability
+            #else:
+            #    result *= (1 - probability)
+
+        return result
+        #probs = [self.distribution.take(i) / self.n
+        #            if f_array[i]
+        #            else 1 - self.distribution.take(i) / self.n
+        #                for i in xrange(self.n)]
+        #return reduce(lambda x,y: x * y, probs)
 
 class NaiveBayesClassifier:
     def __init__(self, outcome_count, feature_count):
@@ -45,7 +52,8 @@ class NaiveBayesClassifier:
         outcome_id = -1
         outcome_probs = -1
         for i in xrange(len(self.outcomes)):
-            i_prob = float(self.outcomes[i].n) / self.sample_size * self.outcomes[i].predict(data)
+            #i_prob = float(self.outcomes[i].n) / self.sample_size * self.outcomes[i].predict(data)
+            i_prob = math.log(self.outcomes[i].n) - math.log(self.sample_size) + self.outcomes[i].predict(data)
             if i_prob > outcome_probs:
                 outcome_probs = i_prob
                 outcome_id = i

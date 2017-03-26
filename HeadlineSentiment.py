@@ -7,7 +7,7 @@ class SentimentAnalyzer:
     def __init__(self, file_location):
         self.features = set([])
         raw_data = []
-        self.training_data = []
+        training_data = []
         #self.word_freq = {}
         with open(file_location, 'rb') as data:
             data_reader = csv.DictReader(data)
@@ -33,10 +33,10 @@ class SentimentAnalyzer:
             f_vector = []
             for f in self.features:
                 f_vector.append(1 if f in data[0] else 0)
-            self.training_data.append((f_vector, data[1], data[2]))
+            training_data.append((f_vector, data[1], data[2]))
 
         self.classifier = NaiveBayesClassifier(6, len(self.features))
-        self.classifier.train(self.training_data)
+        self.classifier.train(training_data)
 
     def predict(self, text):
         token_set = set(nltk.word_tokenize(text))
