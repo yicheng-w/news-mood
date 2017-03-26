@@ -4,17 +4,25 @@ import numpy as np
 import csv
 
 class SentimentAnalyzer:
+    threshold = 1
     def __init__(self, file_location):
         self.features = set([])
         raw_data = []
         training_data = []
+        word_freq = {}
         #self.word_freq = {}
         with open(file_location, 'rb') as data:
             data_reader = csv.DictReader(data)
             for row in data_reader:
                 # print row
                 h_tokens = nltk.word_tokenize(row['headline'].lower())
-                self.features = self.features.union(set(h_tokens))
+                #self.features = self.features.union(set(h_tokens))
+
+                for token in h_tokens:
+                    if token in word_freq:
+                        word_freq[token] += 1
+                    else:
+                        word_freq[token] = 1
 
                 #for token in h_tokens:
                 #    if token in self.word_freq:
@@ -28,6 +36,12 @@ class SentimentAnalyzer:
                 raw_data.append((h_tokens, 3, float(row[' joy']) / 100)) # joy
                 raw_data.append((h_tokens, 4, float(row[' sadness']) / 100)) # sadness
                 raw_data.append((h_tokens, 5, float(row[' surprise']) / 100)) # surprise
+
+        for key in word_freq.keys():
+            if word_freq[key] > self.threshold:
+                self.features.add(key)
+
+        print "F-vec size: " + str(len(self.features))
 
         for data in raw_data:
             f_vector = []
@@ -66,7 +80,7 @@ class SentimentAnalyzer:
                 if emotions[i] > 1:
                     acceptable_emotions.append(i)
             acceptable_emotions = sorted(acceptable_emotions,
-                    reverse=True, key=lambda x: emotions[x])
+                    reverse=True, key=lambda x: emotions[x])[:3]
  
             #print acceptable_emotions
             #print emotion
@@ -80,5 +94,5 @@ class SentimentAnalyzer:
 
 
 if __name__ == "__main__":
-    analyzer = SentimentAnalyzer("emotion_data.csv")
-    print analyzer.test("emotion_data_test.csv")
+    analyzer = SentimentAnalyzer("emotion_data_train.csv")
+    print "Accuracy: " + str(analyzer.test("emotion_data_test.csv"))

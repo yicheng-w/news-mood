@@ -16,11 +16,13 @@ class Outcome:
     def predict(self, f_array):
         #result = 1
         result = math.log(1)
-        for i in xrange(self.n):
+        for i in xrange(self.distribution.size):
+            #prob = math.log(self.distribution.take(i)) - math.log(self.n)
             prob = math.log(1. + self.distribution.take(i)) - math.log(self.distribution.size + self.n)
             if f_array[i]:
                 result += prob
             else:
+                #result += math.log(self.n - self.distribution.take(i)) - math.log(self.n)
                 result += math.log(self.distribution.size + self.n - 1. - self.distribution.take(i)) - math.log(self.distribution.size + self.n)
             #probability = (1. + self.distribution.take(i)) / (self.distribution.size + self.n)
             #if f_array[i]:
