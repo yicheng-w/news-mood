@@ -39,15 +39,46 @@ class SentimentAnalyzer:
         self.classifier.train(training_data)
 
     def predict(self, text):
-        token_set = set(nltk.word_tokenize(text))
+        token_set = set(nltk.word_tokenize(text.lower()))
         f_vector = []
         for f in self.features:
             f_vector.append(1 if f in token_set else 0)
         return self.classifier.predict(f_vector)
 
     def predict_all(self, text):
-        token_set = set(nltk.word_tokenize(text))
+        token_set = set(nltk.word_tokenize(text.lower()))
         f_vector = []
         for f in self.features:
             f_vector.append(1 if f in token_set else 0)
         return self.classifier.predict_all(f_vector)
+
+    def test(self, test_file_location):
+        test_data = open(test_file_location, 'rb')
+        test_reader = csv.DictReader(test_data)
+        total = 0
+        correct = 0
+
+        for row in test_reader:
+            total += 1
+            emotions = map(float, [row[' anger'], row[' disgust'], row[' fear'], row[' joy'], row[' sadness'], row[' surprise']])
+            acceptable_emotions = []
+            for i in xrange(len(emotions)):
+                if emotions[i] > 1:
+                    acceptable_emotions.append(i)
+            acceptable_emotions = sorted(acceptable_emotions,
+                    reverse=True, key=lambda x: emotions[x])
+ 
+            #print acceptable_emotions
+            #print emotion
+            prediction = self.predict(row['headline'])[0]
+            #print prediction
+
+            if prediction in acceptable_emotions:
+                correct+=1
+
+        return float(correct) / total
+
+
+if __name__ == "__main__":
+    analyzer = SentimentAnalyzer("emotion_data.csv")
+    print analyzer.test("emotion_data_test.csv")

@@ -1,6 +1,5 @@
 import requests
 import json
-import pickle
 import dill
 from HeadlineSentiment import SentimentAnalyzer
 import os
@@ -15,21 +14,24 @@ def get_news_headlines():
     headlines = [article['title'] for article in r['articles']]
     return headlines
 
-if "analyzer.dill" not in os.listdir('.'):
-    analyzer = SentimentAnalyzer("emotion_data.csv")
-    f = open("analyzer.dill", 'wb')
-    dill.dump(analyzer, f)
-else:
-    with open("analyzer.dill", 'rb') as f:
-        analyzer = dill.load(f)
+if __name__ == "__main__":
+    if "analyzer.dill" not in os.listdir('.'):
+        print "Training..."
+        analyzer = SentimentAnalyzer("emotion_data.csv")
+        f = open("analyzer.dill", 'wb')
+        dill.dump(analyzer, f)
+        print "Done!"
+    else:
+        print "Loading analyzer..."
+        with open("analyzer.dill", 'rb') as f:
+            analyzer = dill.load(f)
+        print "Done!"
 
-print "Analyzer loaded"
+    headlines = get_news_headlines()
 
-headlines = get_news_headlines()
-
-for headline in headlines:
-    print headline
-    ranked_list = sorted(analyzer.predict_all(headline), reverse=True, key=lambda i: i[1])
-    for i in ranked_list:
-        print sentiment_lookup[i[0]] + " (" + str(i[1]) + ")"
-    print "====="
+    for headline in headlines:
+        print headline
+        ranked_list = sorted(analyzer.predict_all(headline), reverse=True, key=lambda i: i[1])
+        for i in ranked_list:
+            print sentiment_lookup[i[0]] + " (" + str(i[1]) + ")"
+        print "====="

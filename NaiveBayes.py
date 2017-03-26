@@ -49,8 +49,8 @@ class NaiveBayesClassifier:
             self.fit(data, outcome, prob)
 
     def predict(self, data):
-        outcome_id = -1
-        outcome_probs = -1
+        outcome_id = -float('inf')
+        outcome_probs = -float('inf')
         for i in xrange(len(self.outcomes)):
             #i_prob = float(self.outcomes[i].n) / self.sample_size * self.outcomes[i].predict(data)
             i_prob = math.log(self.outcomes[i].n) - math.log(self.sample_size) + self.outcomes[i].predict(data)
