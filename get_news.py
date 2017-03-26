@@ -1,7 +1,9 @@
 import requests
 import json
 import pickle
+import dill
 from HeadlineSentiment import SentimentAnalyzer
+import os
 
 key = open("google_news.key").read()[:-1]
 api_endpt = "https://newsapi.org/v1/articles?apiKey={}&source=google-news".format(key)
@@ -13,7 +15,15 @@ def get_news_headlines():
     headlines = [article['title'] for article in r['articles']]
     return headlines
 
-analyzer = SentimentAnalyzer("emotion_data.csv")
+if "analyzer.dill" not in os.listdir('.'):
+    analyzer = SentimentAnalyzer("emotion_data.csv")
+    f = open("analyzer.dill", 'wb')
+    dill.dump(analyzer, f)
+else:
+    with open("analyzer.dill", 'rb') as f:
+        analyzer = dill.load(f)
+
+print "Analyzer loaded"
 
 headlines = get_news_headlines()
 

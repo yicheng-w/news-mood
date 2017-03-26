@@ -6,7 +6,7 @@ import csv
 class SentimentAnalyzer:
     def __init__(self, file_location):
         self.features = set([])
-        self.raw_data = []
+        raw_data = []
         self.training_data = []
         #self.word_freq = {}
         with open(file_location, 'rb') as data:
@@ -22,14 +22,14 @@ class SentimentAnalyzer:
                 #    else:
                 #        self.word_freq[token] = 1
 
-                self.raw_data.append((h_tokens, 0, float(row[' anger']) / 100)) # anger
-                self.raw_data.append((h_tokens, 1, float(row[' disgust']) / 100)) # disgust
-                self.raw_data.append((h_tokens, 2, float(row[' fear']) / 100)) # fear
-                self.raw_data.append((h_tokens, 3, float(row[' joy']) / 100)) # joy
-                self.raw_data.append((h_tokens, 4, float(row[' sadness']) / 100)) # sadness
-                self.raw_data.append((h_tokens, 5, float(row[' surprise']) / 100)) # surprise
+                raw_data.append((h_tokens, 0, float(row[' anger']) / 100)) # anger
+                raw_data.append((h_tokens, 1, float(row[' disgust']) / 100)) # disgust
+                raw_data.append((h_tokens, 2, float(row[' fear']) / 100)) # fear
+                raw_data.append((h_tokens, 3, float(row[' joy']) / 100)) # joy
+                raw_data.append((h_tokens, 4, float(row[' sadness']) / 100)) # sadness
+                raw_data.append((h_tokens, 5, float(row[' surprise']) / 100)) # surprise
 
-        for data in self.raw_data:
+        for data in raw_data:
             f_vector = []
             for f in self.features:
                 f_vector.append(1 if f in data[0] else 0)

@@ -90,3 +90,6 @@ ENV/
 
 # api keys
 *.key
+.*.un~
+.*~
+*.dill
