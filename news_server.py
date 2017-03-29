@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 import requests
 import dill
 from HeadlineSentiment import SentimentAnalyzer
@@ -41,6 +41,7 @@ def api_news():
 @app.route("/")
 def root():
     news = get_news()
+    return render_template("main.html", emotion=news['dominant_sentiment'])
 
 if __name__ == "__main__":
     print "Training..."
