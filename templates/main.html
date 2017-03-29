@@ -1,7 +1,9 @@
 <h1>Today's Feel: {{ news['dominant_sentiment'] }}</h1>
 
 {% for article in news['articles'] %}
-<a href={{ article['url'] }}><h3>{{ article['headline'] }} ({{ article['primary_emotion'] }})</h3></a>
+<a href={{ article['url'] }}><h3>{{ article['headline'] }} ({{
+        article['primary_emotion'] }}, {{ article['other_emotions'][0] }},
+        {{ article['other_emotions'][1] }})</h3></a>
 <p>By {{ article['author'] }}</p>
 <p>{{ article['description'] }}</p>
 <hr>

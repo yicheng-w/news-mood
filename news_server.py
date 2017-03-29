@@ -24,7 +24,10 @@ def get_news():
         data = {'headline': headline}
         ranked_list = sorted(analyzer.predict_all(headline), reverse=True, key=lambda i: i[1])
         data['primary_emotion'] = sentiment_lookup[ranked_list[0][0]]
+        data['other_emotions'] = [sentiment_lookup[ranked_list[1][0]], sentiment_lookup[ranked_list[2][0]]]
         sentiment_tally[ranked_list[0][0]] += 1
+        sentiment_tally[ranked_list[1][0]] += 0.75
+        sentiment_tally[ranked_list[2][0]] += 0.5
         for i in ranked_list:
             data[sentiment_lookup[i[0]]] = i[1]
         data['url'] = article['url']
