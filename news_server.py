@@ -2,26 +2,34 @@ from flask import Flask, render_template
 import requests
 import dill
 from HeadlineSentiment import SentimentAnalyzer
-from get_news import get_news_headlines
 import json
 import os
 
 app = Flask(__name__)
 
 sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
+key = open("google_news.key").read()[:-1]
+api_endpt = "https://newsapi.org/v1/articles?apiKey={}&source=google-news".format(key)
+sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
 
 def get_news():
     response_dict = {}
-    headlines = get_news_headlines()
+    r = requests.get(api_endpt, data = {"source" : "google-news", "apiKey" : key})
+    r = json.loads(r.text)
+    headlines = [article['title'] for article in r['articles']]
     sentiment_tally = [0, 0, 0, 0, 0, 0]
     h_data = []
-    for headline in headlines:
+    for article in r['articles']:
+        headline = article['title']
         data = {'headline': headline}
         ranked_list = sorted(analyzer.predict_all(headline), reverse=True, key=lambda i: i[1])
         data['primary_emotion'] = sentiment_lookup[ranked_list[0][0]]
         sentiment_tally[ranked_list[0][0]] += 1
         for i in ranked_list:
             data[sentiment_lookup[i[0]]] = i[1]
+        data['url'] = article['url']
+        data['description'] = article['description']
+        data['author'] = article['author']
         h_data.append(data)
 
     dominant_feel = -1
@@ -32,7 +40,7 @@ def get_news():
             dominant_feel = i
 
     return {'dominant_sentiment': sentiment_lookup[dominant_feel],
-            'headlines': h_data}
+            'articles': h_data}
 
 @app.route("/api/news_feels")
 def api_news():
@@ -41,7 +49,7 @@ def api_news():
 @app.route("/")
 def root():
     news = get_news()
-    return render_template("main.html", emotion=news['dominant_sentiment'])
+    return render_template("main.html", news=news)
 
 if __name__ == "__main__":
     print "Training..."
