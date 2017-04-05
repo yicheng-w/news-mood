@@ -6,7 +6,38 @@
         {{ article['other_emotions'][1] }})</h3></a>
 <p>By {{ article['author'] }}</p>
 <p>{{ article['description'] }}</p>
+<p style="float:left;">What do you feel?</p>
+<button class='feedback' h_id={{ article['h_id'] }} emotion="anger"
+ style="float:left; margin=5px;">Anger</button>
+<button class='feedback' h_id={{ article['h_id'] }} emotion="disgust"
+ style="float:left; margin=5px;">Disgust</button>
+<button class='feedback' h_id={{ article['h_id'] }} emotion="fear"
+ style="float:left; margin=5px;">Fear</button>
+<button class='feedback' h_id={{ article['h_id'] }} emotion="joy"
+ style="float:left; margin=5px;">Joy</button>
+<button class='feedback' h_id={{ article['h_id'] }} emotion="sadness"
+ style="float:left; margin=5px;">Sadness</button>
+<button class='feedback' h_id={{ article['h_id'] }} emotion="surprise"
+    style="float:left; margin=5px;">Surprise</button>
 <hr>
 {% endfor %}
 
 News provided by <a href="newsapi.org">newsapi.org</a>
+
+<script>
+Array.from(document.getElementsByClassName('feedback')).forEach(function(c) {
+    c.addEventListener("click", function() {
+        var emotion = c.getAttribute("emotion");
+        var h_id = c.getAttribute("h_id");
+
+        var xmlHTTP = new XMLHttpRequest();
+        xmlHTTP.onreadystatechange = function() { 
+            if (xmlHTTP.readyState == 4 && xmlHTTP.status == 200)
+                console.log(xmlHTTP.responseText);
+        };
+
+        xmlHTTP.open("GET", "http://localhost:11235/react/" + h_id + "/" + emotion + "/", true);
+        xmlHTTP.send(null);
+    });
+});
+</script>

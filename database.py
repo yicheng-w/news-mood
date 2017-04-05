@@ -35,23 +35,39 @@ class DBManager:
         q = self.select_q % ("id", c.headline_table, condition)
         r =  self.db.execute(q)
         if r:
-            return r
+            return r[0][0]
         else:
             return 0
 
     def add_headline(self, headline):
-        values = "%d, ?" % (self.get_next_available_id())
-        q = self.insert_q % (c.headline_table, values)
-        self.db.execute(q, (headline,))
+        """
+        add_headline: add the headline to the headlines table, returns the id,
+        if it already exists, just return the id
+    
+        Args:
+            headline (string): the headline to add
+        
+        Returns:
+            int - id of the headline (new or old)
+        """
+        h_id = self.get_id(headline)
+        if not h_id:
+            h_id = self.get_next_available_id()
+            values = "%d, ?" % (h_id)
+            q = self.insert_q % (c.headline_table, values)
+            self.db.execute(q, (headline,))
+        return h_id
 
     def get_id(self, headline):
         condition = "WHERE headline = ? LIMIT 1"
         q = self.select_q % ("id", c.headline_table, condition)
         r = self.db.execute(q, (headline,))
-        return r[0][0]
+        if len(r) > 0:
+            return r[0][0]
+        else:
+            return None
 
-    def add_emotion(self, headline, emotion_id):
-        h_id = self.get_id(headline)
+    def add_emotion(self, h_id, emotion_id):
         values = "?, ?"
         q = self.insert_q % (c.feeback_table, values)
         self.db.execute(q, (h_id, emotion_id))
@@ -74,6 +90,6 @@ if __name__ == "__main__":
     import init
     is_initialized()
     db = DBManager()
-    db.add_headline("blah blah blah")
-    db.add_emotion("blah blah blah", c.sentiment_lookup_reverse['anger'])
+    h_id = db.add_headline("blah blah blah")
+    db.add_emotion(h_id, c.sentiment_lookup_reverse['anger'])
     print db.query_emotion_feedback("blah blah blah")

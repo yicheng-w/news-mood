@@ -4,19 +4,20 @@ import dill
 from HeadlineSentiment import SentimentAnalyzer
 import json
 import os
+from database import DBManager
+import constants as c
 
 app = Flask(__name__)
+db_manager = DBManager()
 
 sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
 key = open("google_news.key").read()[:-1]
 api_endpt = "https://newsapi.org/v1/articles?apiKey={}&source=google-news".format(key)
-sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
 
 def get_news():
     response_dict = {}
     r = requests.get(api_endpt, data = {"source" : "google-news", "apiKey" : key})
     r = json.loads(r.text)
-    headlines = [article['title'] for article in r['articles']]
     sentiment_tally = [0, 0, 0, 0, 0, 0]
     h_data = []
     for article in r['articles']:
@@ -33,6 +34,7 @@ def get_news():
         data['url'] = article['url']
         data['description'] = article['description']
         data['author'] = article['author']
+        data['h_id'] = db_manager.add_headline(headline)
         h_data.append(data)
 
     dominant_feel = -1
@@ -53,6 +55,12 @@ def api_news():
 def root():
     news = get_news()
     return render_template("main.html", news=news)
+
+### api endpts
+@app.route("/react/<h_id>/<emotion>/")
+def add_feedback(h_id, emotion):
+    print("FEEDBACK! on " + str(h_id) + ": " + emotion)
+    db_manager.add_emotion(h_id, c.sentiment_lookup_reverse[emotion])
 
 if __name__ == "__main__":
     print "Training..."
