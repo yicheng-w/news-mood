@@ -6,6 +6,7 @@
         {{ article['other_emotions'][1] }})</h3></a>
 <p>By {{ article['author'] }}</p>
 <p>{{ article['description'] }}</p>
+<div>
 <span style="float:left; margin:0px 5px 0px 0px;">How do you feel about this?</span>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="anger"
  style="float:left; margin:0px 5px;">Anger</button>
@@ -20,6 +21,7 @@
 <button class='feedback' h_id={{ article['h_id'] }} emotion="surprise"
     style="float:left; margin:0px 5px;">Surprise</button>
 <br>
+</div>
 <hr>
 {% endfor %}
 
@@ -39,6 +41,10 @@ Array.from(document.getElementsByClassName('feedback')).forEach(function(c) {
 
         xmlHTTP.open("GET", "http://localhost:11235/react/" + h_id + "/" + emotion + "/", true);
         xmlHTTP.send(null);
+
+        var p = c.parentElement;
+        var pp = c.parentElement.parentElement;
+        pp.removeChild(p);
     });
 });
 </script>
