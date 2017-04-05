@@ -6,19 +6,20 @@
         {{ article['other_emotions'][1] }})</h3></a>
 <p>By {{ article['author'] }}</p>
 <p>{{ article['description'] }}</p>
-<p style="float:left;">What do you feel?</p>
+<span style="float:left; margin:0px 5px 0px 0px;">How do you feel about this?</span>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="anger"
- style="float:left; margin=5px;">Anger</button>
+ style="float:left; margin:0px 5px;">Anger</button>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="disgust"
- style="float:left; margin=5px;">Disgust</button>
+ style="float:left; margin:0px 5px;">Disgust</button>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="fear"
- style="float:left; margin=5px;">Fear</button>
+ style="float:left; margin:0px 5px;">Fear</button>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="joy"
- style="float:left; margin=5px;">Joy</button>
+ style="float:left; margin:0px 5px;">Joy</button>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="sadness"
- style="float:left; margin=5px;">Sadness</button>
+ style="float:left; margin:0px 5px;">Sadness</button>
 <button class='feedback' h_id={{ article['h_id'] }} emotion="surprise"
-    style="float:left; margin=5px;">Surprise</button>
+    style="float:left; margin:0px 5px;">Surprise</button>
+<br>
 <hr>
 {% endfor %}
 

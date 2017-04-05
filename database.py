@@ -35,7 +35,7 @@ class DBManager:
         q = self.select_q % ("id", c.headline_table, condition)
         r =  self.db.execute(q)
         if r:
-            return r[0][0]
+            return r[0][0] + 1
         else:
             return 0
 
@@ -51,7 +51,7 @@ class DBManager:
             int - id of the headline (new or old)
         """
         h_id = self.get_id(headline)
-        if not h_id:
+        if h_id == None:
             h_id = self.get_next_available_id()
             values = "%d, ?" % (h_id)
             q = self.insert_q % (c.headline_table, values)
@@ -91,5 +91,10 @@ if __name__ == "__main__":
     is_initialized()
     db = DBManager()
     h_id = db.add_headline("blah blah blah")
+    h_id_2 = db.add_headline("blah blah blah")
+    print h_id
+    print h_id_2
+    h_id_3 = db.add_headline("headline2")
+    print h_id_3
     db.add_emotion(h_id, c.sentiment_lookup_reverse['anger'])
     print db.query_emotion_feedback("blah blah blah")

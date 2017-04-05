@@ -61,6 +61,7 @@ def root():
 def add_feedback(h_id, emotion):
     print("FEEDBACK! on " + str(h_id) + ": " + emotion)
     db_manager.add_emotion(h_id, c.sentiment_lookup_reverse[emotion])
+    return json.dumps({"result" : "success"})
 
 if __name__ == "__main__":
     print "Training..."
