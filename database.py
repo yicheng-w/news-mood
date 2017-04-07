@@ -72,6 +72,52 @@ class DBManager:
         q = self.insert_q % (c.feeback_table, values)
         self.db.execute(q, (h_id, emotion_id))
 
+    def get_all_emotion_feedbacks(self):
+        """
+        get_all_emotion_feedbacks: returns the entire feedback back in tabular
+        form
+    
+        Returns:
+            A list in the form of [(<headline>, [<emotions>]), ... ]
+        """
+
+        select_all = self.select_q % ("*", c.headline_table, "")
+        headlines = self.db.execute(select_all)
+        ret_val = []
+        
+        for (id, headline) in headlines:
+            condition = "WHERE id = ?"
+            select_emotions = self.select_q % ("emotion", c.feeback_table, condition)
+            r = self.db.execute(select_emotions)
+
+            emotions = [0 for i in xrange(len(c.sentiment_lookup))]
+
+            for (e,) in r:
+                emotions[e] += 1
+
+            ret_val.append((headline, emotions))
+
+        return ret_val
+
+    def clear_tables(self):
+        """
+        clear_tables: cleans up the feedback database (highly suggested to do
+        ONLY after running self.get_all_emotion_feedbacks())
+    
+        Returns: void
+        """
+
+        delete_q = "delete from %s"
+        vaccum_q = "vacuum"
+
+        delete_headlines = delete_q % c.headline_table
+        delete_feedbacks = delete_q % c.feeback_table
+
+        self.db.execute(delete_headlines)
+        self.db.execute(vaccum_q)
+        self.db.execute(delete_feedbacks)
+        self.db.execute(vaccum_q)
+
     def query_emotion_feedback(self, headline):
         h_id = self.get_id(headline)
         condition = "WHERE id = ?"
