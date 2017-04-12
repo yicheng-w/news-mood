@@ -1,5 +1,5 @@
 # News Mood
-Monitor of mood of current headlines, the web frontend is up (and collecting data) on http://hatch01.unc.edu:11235
+Monitor of mood of current headlines, the web frontend is up (and collecting data) on http://hatch01.cs.unc.edu:11235
 
 News provided by www.newsapi.org
 
