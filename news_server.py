@@ -11,6 +11,7 @@ app = Flask(__name__)
 db_manager = DBManager()
 
 sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
+headline_lookup = ['Angry', 'Disgusting', 'Fearful', 'Happy', 'Sad', 'Surprising']
 key = open("google_news.key").read()[:-1]
 api_endpt = "https://newsapi.org/v1/articles?apiKey={}&source=google-news".format(key)
 
@@ -44,7 +45,7 @@ def get_news():
             dominant_count = sentiment_tally[i]
             dominant_feel = i
 
-    return {'dominant_sentiment': sentiment_lookup[dominant_feel],
+    return {'dominant_sentiment': headline_lookup[dominant_feel],
             'articles': h_data}
 
 @app.route("/api/news_feels")
