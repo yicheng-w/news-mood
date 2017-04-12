@@ -64,6 +64,12 @@ def add_feedback(h_id, emotion):
     db_manager.add_emotion(h_id, c.sentiment_lookup_reverse[emotion])
     return json.dumps({"result" : "success"})
 
+print "Training..."
+analyzer = SentimentAnalyzer("emotion_data.csv")
+f = open("analyzer.dill", 'wb')
+dill.dump(analyzer, f)
+print "Done!"
+
 if __name__ == "__main__":
     print "Training..."
     analyzer = SentimentAnalyzer("emotion_data.csv")
