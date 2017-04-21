@@ -5,4 +5,5 @@ dill
 nltk
 numpy
 flask
+word2vec
 
