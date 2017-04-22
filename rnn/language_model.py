@@ -2,9 +2,11 @@ import tensorflow as tf
 import numpy as np
 import nltk
 import csv
+import os
 
 features = []
 inv_features = {}
+sentiment_lookup = ['anger', 'disgust', 'fear', 'joy', 'sadness', 'surprise']
 
 def read_test(file_location, rows_to_take = -1):
     global features, inv_features
@@ -22,12 +24,12 @@ def read_test(file_location, rows_to_take = -1):
 
         for row in data_reader:
             h_tokens = nltk.word_tokenize(row['headline'].lower())
-            y[:, i, 0] = (float(row[' anger']) / 100,
-                          float(row[' disgust']) / 100,
-                          float(row[' fear']) / 100,
-                          float(row[' joy']) / 100,
-                          float(row[' sadness']) / 100,
-                          float(row[' surprise']) / 100,
+            y[:, i, 0] = (float(row[' anger']),
+                          float(row[' disgust']),
+                          float(row[' fear']),
+                          float(row[' joy']),
+                          float(row[' sadness']),
+                          float(row[' surprise']),
                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
             f_vector = []
@@ -44,6 +46,26 @@ def read_test(file_location, rows_to_take = -1):
             i+=1
 
         return x,y
+
+def compute_input_vec(headline):
+    h_tokens = nltk.word_tokenize(headline.lower())
+
+    x = np.empty((18, 1, 1))
+
+    f_vector = []
+    for token in h_tokens:
+        if token in inv_features:
+            f_vector.append(inv_features[token])
+        else:
+            f_vector.append(-1)
+
+    while (len(f_vector) < 18):
+        f_vector.append(-2)
+
+    x[:,0,0] = f_vector
+
+    return x
+
 
 def read_csv(file_location, rows_to_take = -1):
     raw_data = []
@@ -73,12 +95,12 @@ def read_csv(file_location, rows_to_take = -1):
                 else:
                     word_freq[token] = 1
 
-            y[:, i, 0] = (float(row[' anger']) / 100,
-                          float(row[' disgust']) / 100,
-                          float(row[' fear']) / 100,
-                          float(row[' joy']) / 100,
-                          float(row[' sadness']) / 100,
-                          float(row[' surprise']) / 100,
+            y[:, i, 0] = (float(row[' anger']),
+                          float(row[' disgust']),
+                          float(row[' fear']),
+                          float(row[' joy']),
+                          float(row[' sadness']),
+                          float(row[' surprise']),
                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
             raw_data.append(h_tokens)
@@ -138,24 +160,24 @@ predicted_outputs = tf.map_fn(final_projection, rnn_outputs)
 
 
 #error = -(outputs * tf.log(predicted_outputs + EPSILON) + (1.0 - outputs) * tf.log(1.0 - predicted_outputs + EPSILON))
-error = -tf.log(tf.norm(outputs - predicted_outputs) + EPSILON)
+error = tf.log(tf.norm(outputs - predicted_outputs) + EPSILON)
 error = tf.reduce_mean(error)
 
 train_fn = tf.train.AdamOptimizer(learning_rate=ALPHA).minimize(error)
 
-#accuracy = tf.reduce_mean(tf.cast(tf.abs(outputs - predicted_outputs) < 0.5, tf.float32))
-accuracy = tf.reduce_mean(tf.cast(tf.norm(outputs - predicted_outputs) < 0.5,
-    tf.float32))
+#accuracy = tf.reduce_mean(tf.cast(tf.abs(outputs - predicted_dhfutputs) < 0.5, tf.float32))
+accuracy = tf.reduce_mean(tf.norm(outputs - predicted_outputs))
 
 session = tf.Session()
+
 session.run(tf.global_variables_initializer())
 
 x, y = read_csv("../emotion_data_train.csv")
 xt, yt = read_test("../emotion_data_test.csv")
 
-for epoch in range(1000):
+for epoch in range(15):
     epoch_error = 0
-    for i in range(100):
+    for i in range(500):
         #print i
         epoch_error += session.run([error, train_fn], {
             inputs: x,
@@ -170,3 +192,17 @@ for epoch in range(1000):
     })
 
     print "Epoch %d, train error: %.2f, valid accuracy: %.1f %%" % (epoch, epoch_error, valid_accuracy * 100.0)
+
+input = raw_input()
+
+while input != "exit":
+    x = compute_input_vec(input)
+    get_index = tf.arg_max(tf.reshape(predicted_outputs, [-1]), 0)
+    i = session.run(get_index, {inputs:x})
+    print input
+    try:
+        print sentiment_lookup[i]
+    except IndexError:
+        print "Error..."
+
+    input = raw_input()
