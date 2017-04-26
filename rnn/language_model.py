@@ -140,12 +140,12 @@ INPUT_SZ = 1
 OUTPUT_SZ = 1
 RNN_HIDDEN = 100
 EPSILON = 1e-6
-ALPHA = 0.01
+ALPHA = 0.0005
 
 inputs = tf.placeholder(tf.float32, (None, None, INPUT_SZ))
 outputs = tf.placeholder(tf.float32, (None, None, OUTPUT_SZ))
 
-cell = tf.contrib.rnn.BasicLSTMCell(RNN_HIDDEN, state_is_tuple=True)
+cell = tf.contrib.rnn.BasicRNNCell(RNN_HIDDEN)
 
 batch_size = tf.shape(inputs)[1]
 initial_state = cell.zero_state(batch_size, tf.float32)
@@ -159,7 +159,7 @@ final_projection = lambda x: tf.contrib.layers.linear(x, num_outputs=OUTPUT_SZ,
 predicted_outputs = tf.map_fn(final_projection, rnn_outputs)
 
 #error = -(outputs * tf.log(predicted_outputs + EPSILON) + (1.0 - outputs) * tf.log(1.0 - predicted_outputs + EPSILON))
-error = tf.log(tf.norm(outputs - predicted_outputs) + EPSILON)
+error = tf.norm(outputs - predicted_outputs) + EPSILON
 error = tf.reduce_mean(error)
 
 train_fn = tf.train.AdamOptimizer(learning_rate=ALPHA).minimize(error)
@@ -175,16 +175,17 @@ session.run(tf.global_variables_initializer())
 x, y = read_csv("../emotion_data_train.csv")
 xt, yt = read_test("../emotion_data_test.csv")
 
-for epoch in range(10):
+for epoch in range(1000):
     epoch_error = 0
-    for i in range(500):
-        #print i
+    for i in range(20):
         epoch_error += session.run([error, train_fn], {
-            inputs: x,
-            outputs: y,
-        })[0]
+            inputs: x[:, i*50:(i+1)*50, :],
+            outputs: y[:, i*50:(i+1)*50, :]
+            })[0]
+        #print i
+        # split into 20 mini batches
 
-    epoch_error /= 100
+    epoch_error /= 1000
 
     valid_accuracy = session.run(accuracy, {
         inputs:  xt,
@@ -192,6 +193,8 @@ for epoch in range(10):
     })
 
     print "Epoch %d, train error: %.2f, valid accuracy: %.1f %%" % (epoch, epoch_error, valid_accuracy * 100.0)
+
+xt, yt = read_test("../emotion_data_test2.csv")
 
 yp = session.run(predicted_outputs, {inputs: xt})
 
@@ -205,8 +208,8 @@ def calculate_accuracy(y, yp):
         c_vec = y[:, i, 0][:6]
         p_vec = yp[:, i, 0][:6]
 
-        print y[:, i, 0]
-        print yp[:, i, 0]
+        #print y[:, i, 0]
+        #print yp[:, i, 0]
 
         acceptabe_vals = []
 
@@ -214,17 +217,21 @@ def calculate_accuracy(y, yp):
             if c_vec[i] > 1:
                 acceptabe_vals.append(i)
 
-        print acceptabe_vals
+        #print acceptabe_vals
 
         acceptabe_vals = sorted(acceptabe_vals, reverse=True,
-                key=lambda x: c_vec[i])[:3]
+                key=lambda x: c_vec[x])[:3]
 
-        print acceptabe_vals
-        print tf.arg_max(p_vec, 1)
+        #print acceptabe_vals
 
-        raw_input()
+        max_p = -1
+        max_i = -1
+        for i in xrange(len(p_vec)):
+            if (p_vec[i] > max_p):
+                max_i = i
+                max_p = p_vec[i]
 
-        if tf.arg_max(p_vec, 1) in acceptabe_vals:
+        if max_i in acceptabe_vals:
             correct+=1
 
     return correct / total
