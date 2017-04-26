@@ -36,4 +36,31 @@ for i in xrange(EPOCH_COUNT):
         input: x, output: y
         })
 
-    print session.run(accuracy, {input: xt, output: yt})
+    ypp = session.run(yp, {input: xt})
+
+    correct = 0
+    total = yt.shape[0]
+    for i in xrange(yt.shape[0]):
+        acceptable_vals = []
+        for j in xrange(yt.shape[1]):
+            if yt[i, j] > 0:
+                acceptable_vals.append(j)
+        acceptable_vals = sorted(acceptable_vals, reverse=True,
+                key=lambda x: yt[i, x])[:3]
+
+        #print yt[i, :]
+        #print acceptable_vals
+
+        max_p = -1
+        max_i = -1
+        for j in xrange(yt.shape[1]):
+            if ypp[i, j] > max_p:
+                max_p = ypp[i, j]
+                max_i = j
+
+        if max_i in acceptable_vals:
+            correct += 1
+
+    print(float(correct) / total)
+    print(session.run(accuracy, {input: xt, output: yt}))
+    print("===")

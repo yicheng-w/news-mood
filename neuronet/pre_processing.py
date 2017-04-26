@@ -99,6 +99,8 @@ def read_test(file_location, rows_to_take = -1):
 
             x[i, :] = f_vector
 
+            i += 1
+
         return x,y
 
 def compute_input_vec(headline):
