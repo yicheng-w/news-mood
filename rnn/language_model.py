@@ -158,7 +158,6 @@ final_projection = lambda x: tf.contrib.layers.linear(x, num_outputs=OUTPUT_SZ,
 
 predicted_outputs = tf.map_fn(final_projection, rnn_outputs)
 
-
 #error = -(outputs * tf.log(predicted_outputs + EPSILON) + (1.0 - outputs) * tf.log(1.0 - predicted_outputs + EPSILON))
 error = tf.log(tf.norm(outputs - predicted_outputs) + EPSILON)
 error = tf.reduce_mean(error)
@@ -167,6 +166,7 @@ train_fn = tf.train.AdamOptimizer(learning_rate=ALPHA).minimize(error)
 
 #accuracy = tf.reduce_mean(tf.cast(tf.abs(outputs - predicted_dhfutputs) < 0.5, tf.float32))
 accuracy = tf.reduce_mean(tf.norm(outputs - predicted_outputs))
+#accuracy = calculate_accuracy(outputs, predicted_outputs)
 
 session = tf.Session()
 
@@ -175,7 +175,7 @@ session.run(tf.global_variables_initializer())
 x, y = read_csv("../emotion_data_train.csv")
 xt, yt = read_test("../emotion_data_test.csv")
 
-for epoch in range(15):
+for epoch in range(10):
     epoch_error = 0
     for i in range(500):
         #print i
@@ -192,6 +192,44 @@ for epoch in range(15):
     })
 
     print "Epoch %d, train error: %.2f, valid accuracy: %.1f %%" % (epoch, epoch_error, valid_accuracy * 100.0)
+
+yp = session.run(predicted_outputs, {inputs: xt})
+
+# redefine accuracy as interperted by HeadlineSentiment.py
+def calculate_accuracy(y, yp):
+# calculates the accuracy from y (correct output) of yp (projected output)
+    correct = 0.0
+    total = y.shape[1]
+
+    for i in xrange(total):
+        c_vec = y[:, i, 0][:6]
+        p_vec = yp[:, i, 0][:6]
+
+        print y[:, i, 0]
+        print yp[:, i, 0]
+
+        acceptabe_vals = []
+
+        for i in xrange(len(c_vec)):
+            if c_vec[i] > 1:
+                acceptabe_vals.append(i)
+
+        print acceptabe_vals
+
+        acceptabe_vals = sorted(acceptabe_vals, reverse=True,
+                key=lambda x: c_vec[i])[:3]
+
+        print acceptabe_vals
+        print tf.arg_max(p_vec, 1)
+
+        raw_input()
+
+        if tf.arg_max(p_vec, 1) in acceptabe_vals:
+            correct+=1
+
+    return correct / total
+
+print "Accuracy: %f" % (calculate_accuracy(yt, yp))
 
 input = raw_input()
 
